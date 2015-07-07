@@ -3,30 +3,50 @@ $(function() {
     var defaultQuery = "warriors"
     var minWC = "5" // min word count
     var maxWC = "100" // max word count
-    var $submit = $('#submit-query');
+    var $submit = $('#submit-query');  // use single or double quotes for strings not both
     $submit.on("click", function(e) {
         e.preventDefault();
         if ($('svg.bubble').length > 0) {
             $('svg.bubble').remove()
         }
-        query = $('#search-query').val() || defaultQuery;
-        minWC = $('#min-word-count').val() || minWC
-        maxWC = $('#max-word-count').val() || maxWC
-        console.log(query);
+        query = $('#search-query').val() || defaultQuery; // missing var
+        minWC = $('#min-word-count').val() || minWC  // missing var
+        maxWC = $('#max-word-count').val() || maxWC  // missing var
+        
+        //build query string first
+        var queryStr = "/twitter/?query=" + encodeURIComponent(query) +
+                       "&min=" + minWC +
+                       "&max=" + maxWC;
+                       
+        console.log(query); // remove loging from master branch
         console.log(minWC);
         console.log(maxWC);
-        if (query !== '') {
-            $.get("/twitter/?query=" + encodeURIComponent(query) +
-                "&min=" + minWC +
-                "&max=" + maxWC).done(function(data) {
-                //console.log(data);
-                draw(data);
-            });
+        if (query !== '') { // what about if query is ' ' or equivalent what is well formatted query
+            // keep it readable
+            $.get(queryStr)
+                .done(function(data) {
+                    //console.log(data); 
+                    draw(data);
+                });
+            /* 
+                consider just reducing to
+                $.get(queryStr).done(draw)''
+            */
         } else {
             alert("You must enter a search query");
         }
 
     });
+    
+    // consider making a function
+    /*
+        var makeQuery = function makeQuery(query, minWC, maxWC) {
+            return "/twitter/?query=" + 
+                    encodeURIComponent(query) +
+                   "&min=" + minWC +
+                   "&max=" + maxW; 
+        }
+    */
     $.get("/twitter/?query=" + encodeURIComponent(defaultQuery) +
         "&min=" + minWC +
         "&max=" + maxWC).done(function(data) {
@@ -36,6 +56,7 @@ $(function() {
 
 
 function draw(root) {
+    
     var height = 960,
         width = 1260,
         format = d3.format(",d"),
@@ -111,7 +132,9 @@ function draw(root) {
         .transition()
         .duration(duration * 50)
         .style('opacity', 1);
-
+        
+        // consider putting the following in 
+        // a separate function 
         var defaultQuery = "warriors"
         var minWC = "5" // min word count
         var maxWC = "100" // max word coun
@@ -140,7 +163,8 @@ function classes(root) {
     var classesArr = [];
 
     function recurse(name, node) {
-        if (node.children) node.children.forEach(function(child) {
+        // it's always best to use curly's
+        if (node.children) node.children.forEach(function(child) { 
             recurse(node.name, child);
         });
         else classesArr.push({
@@ -155,6 +179,8 @@ function classes(root) {
         children: classesArr
     };
 }
+
+//why these global functions...
 
 function show_details(d, i, element) {
     d3.select(element).attr("stroke", "black");
